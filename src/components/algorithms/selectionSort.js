@@ -1,39 +1,38 @@
 import { sleep } from "../../utils/sleep";
+import { pause } from "../../utils/pause";
 
-export const selectionSort = async (array, setArray, setActiveIndex, setCompareIndex, cancelSort,speed) => {
+export const selectionSort = async (array, setArray, setActiveIndex, setCompareIndex, speed, evalStateRef) => {
     let arr = [...array];
     let count = 0;
 
-    for (let i = 0; i < arr.length; i++) { 
-        if(cancelSort.current) return undefined
-        
+    for (let i = 0; i < arr.length; i++) {
         let indexMin = i;
         setActiveIndex(indexMin);
 
         for (let j = i + 1; j < arr.length; j++) {
-            if(cancelSort.current) return undefined
-            
+            await pause(evalStateRef)
+
+            if (evalStateRef.current === 'notStarted') {
+                throw new Error('cancelSort')
+            }
+
             setCompareIndex(j);
-            await sleep(50,speed.current); // Задержка для визуализации сравнения
+            await sleep(speed);
 
             if (arr[j] < arr[indexMin]) {
                 indexMin = j;
                 setActiveIndex(indexMin);
             }
+
             count += 1;
         }
 
         let tmp = arr[i];
         arr[i] = arr[indexMin];
         arr[indexMin] = tmp;
+
         setArray([...arr]);
 
-        await sleep(200,speed.current); // Задержка для визуализации обмена
-        setCompareIndex(null); 
+        setCompareIndex(null);
     }
-
-    setActiveIndex(null); 
-    setCompareIndex(null); 
-    return arr
-
 };
